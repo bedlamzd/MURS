@@ -1,0 +1,10 @@
+/venv
+.idea/
+
+*.aux
+*.log
+*.gz
+*.pdf
+*.asv
+*.pygstyle
+*.pygtex
