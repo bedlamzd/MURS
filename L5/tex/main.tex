@@ -10,5 +10,62 @@
 \begin{document}
     \include{title_page}
 
+    \section*{Дано}
+    Модель двухзвенного робота
+    \begin{equation}
+        \label{eq:sys}
+        M(q)\ddot{q} + C(q, \dot{q})\dot{q} + F\dot{q} +G(q) = u,
+    \end{equation}
+    где $q,\ \dot{q},\ \ddot{q}$ --- векторы обобщённых координат, скоростей и ускорений соответственно,
+    $u$ --- вектор управляющих воздействий,
+    $M(q),\ C(q,\dot{q}),\ F$ --- матрицы инерции, кориолисовых-центробежных сил и вязкого трения соответственно,
+    $G(q)$ --- вектор гравитационных сил.
+    \newline
+
+    Задающий сигнал
+    \begin{equation}
+        \label{eq:traject}
+        q_{\text{ref}}(t) =
+        \begin{bmatrix}
+            A_{\text{ref},\ 1}\sin(\omega_{\text{ref},\ 1}t + \psi_{\text{ref},\ 1})\\
+            A_{\text{ref},\ 2}\sin(\omega_{\text{ref},\ 2}t + \psi_{\text{ref},\ 2})
+        \end{bmatrix}
+    \end{equation}
+
+    Цель управления
+    \begin{equation}
+        \label{eq:goal}
+        \lim_{t \rightarrow \inf }\left| q_e(t) \right| = 0
+    \end{equation}
+
+    \section*{Задание}
+    \paragraph*{Задание 1} Управление роботом по состоянию
+
+    \subparagraph{Допущение 1} Вектор обобщённых скоростей $\dot{q}(t)$ доступен измерению.
+
+    \subparagraph{Допущение 2} Матрицы $M(q),\ C(q, \dot{q}),\ F,\ G$ известны. \\
+
+    \noindent Закон управления
+    \begin{equation}
+        \label{eq:control by speed}
+        u = M(q)\left( \ddot{q_\text{ref}} - K_p q_e - K_d\dot{q_e}) \right) + C(q, \dot{q})\dot{q} + F\dot{q} + G(q),
+    \end{equation}
+    где $K_p$ и $K_d$ --- соответственно матрицы пропорциональных и дифференциальных коэффициентов.
+    \newline
+
+    Требуется провести численное моделирование замкнутой системы~\eqref{eq:sys},~\eqref{eq:control by speed}
+    в режиме слежения за траекторией~\eqref{eq:traject} с обеспечением цели управления~\eqref{eq:goal}.
+
+    \paragraph*{Задание 2} Управление роботом по выходу
+
+    Ослабим Допущение 1 и построим регулятор по выходу. Выберем закон управления
+    \begin{equation}
+        \label{eq:control no speed}
+        u = M(q)\left( \ddot{q_\text{ref}} - K_p q_e - K_d \left( \hat{\dot{q}} - \dot{q_\text{ref}} \right)) \right) + C(q, \hat{\dot{q}})\hat{\dot{q}} + F\hat{\dot{q}} + G(q),
+    \end{equation} где $K_p$ и $K_d$ --- соответственно матрицы пропорциональных и дифференциальных коэффициентов,
+    $\hat{\dot{q}}$ --- оценка обобщённой скорости, полученная с помощью фильтра на базе расширенного наблюдателя.
+
+    Требуется провести численное моделирование замкнутой системы~\eqref{eq:sys},~\eqref{eq:control no speed}
+    в режиме слежения за траекторией~\eqref{eq:traject} с обеспечением цели управления~\eqref{eq:goal}.
 
 \end{document}
