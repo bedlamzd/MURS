@@ -30,18 +30,21 @@
 \usepackage[outputdir=out]{minted}
 
 \renewcommand{\theFancyVerbLine}{\ttfamily{\normalsize\oldstylenums{\arabic{FancyVerbLine}}}}
+\renewcommand{\listingscaption}{Листинг}
 
-\newminted{python}{autogobble, linenos, fontsize=\small, xleftmargin=2\parindent}
+\newminted{python}{autogobble, linenos, fontsize=\small}
 \newmintinline{python}{fontsize=\small}
-\newmintedfile{python}{autogobble, linenos, fontsize=\small, xleftmargin=2\parindent,
-breakanywhere, breaklines}
+\newmintedfile{python}{autogobble, linenos, fontsize=\small, breakanywhere, breaklines}
 
-\newminted{matlab}{autogobble, linenos, fontsize=\small, xleftmargin=2\parindent}
+\newminted{matlab}{autogobble, linenos, fontsize=\small}
 \newmintinline{matlab}{fontsize=\small}
-\newmintedfile{matlab}{autogobble, linenos, fontsize=\small, xleftmargin=2\parindent,
-breakanywhere, breaklines}
+\newmintedfile{matlab}{autogobble, linenos, fontsize=\small, breakanywhere, breaklines}
 
-\renewcommand{\thesubsection}{\arabic{subsection}}
+\newminted{octave}{autogobble, linenos, fontsize=\small}
+\newmintinline{octave}{fontsize=\small}
+\newmintedfile{octave}{autogobble, linenos, fontsize=\small, breakanywhere, breaklines}
+
+%\renewcommand{\thesubsection}{\arabic{subsection}}
 
 \graphicspath{{../img/}}
 

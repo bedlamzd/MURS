@@ -35,15 +35,16 @@
     Цель управления
     \begin{equation}
         \label{eq:goal}
-        \lim_{t \rightarrow \inf }\left| q_e(t) \right| = 0
+        \lim_{t \rightarrow \inf }\left| q_e(t) \right| = 0,
     \end{equation}
+    где $q_e(t) = q(t) - q_\text{ref}(t)$ --- сигнал ошибки.
 
     \section*{Задание}
     \paragraph*{Задание 1} Управление роботом по состоянию
 
     \subparagraph{Допущение 1} Вектор обобщённых скоростей $\dot{q}(t)$ доступен измерению.
 
-    \subparagraph{Допущение 2} Матрицы $M(q),\ C(q, \dot{q}),\ F,\ G$ известны. \\
+    \subparagraph{Допущение 2} Матрицы $M(q),\ C(q, \dot{q}),\ F,\ G(q)$ известны. \\
 
     \noindent Закон управления
     \begin{equation}
@@ -67,5 +68,127 @@
 
     Требуется провести численное моделирование замкнутой системы~\eqref{eq:sys},~\eqref{eq:control no speed}
     в режиме слежения за траекторией~\eqref{eq:traject} с обеспечением цели управления~\eqref{eq:goal}.
+
+    \section*{Моделирование}
+    \subsection*{Задание 1}
+    В пакете MATLAB соберём систему~\eqref{eq:sys},~\eqref{eq:control by speed} в виде модели Simulink.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\textwidth]{global sys.jpg}
+        \caption{Общий вид модели в MATLAB}
+        \label{pic:global sys}
+    \end{figure}
+
+    Инициализация всех параметров производится с помощью автоматически вызываемой встроенной функции \texttt{InitFcn},
+    где перечисленны необходимые переменные (см.~\ref{code:given}).
+    \begin{figure}[H]
+        \centering
+        \includegraphics[height=0.3\textheight]{InitFcn.png}
+        \caption{Окно \texttt{InitFcn}}
+        \label{pic:InitFcn}
+    \end{figure}
+
+    \sloppy Модель манипулятора представлена на рисунке~\ref{pic:manipulator}, где матрицы $M(q),\ C(q, \dot{q}),\ G(q)$ представлены блоками
+    \texttt{MATLAB Function}. (см.~\ref{code:matricies})
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\textwidth]{manipulator.png}
+        \caption{Модель манипулятора}
+        \label{pic:manipulator}
+    \end{figure}
+
+    Модель регулятора представлена на рисунке~\ref{pic:controller no observer}, при этом по допущению 2 мы можем использовать
+    матрицы напрямую, которые представлены уже показанными блоками функций.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\textwidth]{controller no observer.png}
+        \caption{Модель регулятора}
+        \label{pic:controller no observer}
+    \end{figure}
+
+    Генератор задающего воздействия~\eqref{eq:traject} представлен на рисунке~\ref{pic:generator}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\textwidth]{generator.png}
+        \caption{Модель задающего воздействия}
+        \label{pic:generator}
+    \end{figure}
+
+    Результат моделирования представлен на рисунке~\ref{pic:result by speed}. По графику очевидно, что ошибка
+    положения звеньев сходится в нулю и соответственно цель моделирования~\eqref{eq:goal} выполнена.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\textwidth]{result by speed.png}
+        \caption{Ошибка положения системы}
+        \label{pic:result by speed}
+    \end{figure}
+
+    \section*{Задание 2}
+    Ослабив допущение 1 мы более не имеем возможности напрямую измерять скорость звеньев манипулятора
+    и модель изменяется соответственно.
+
+    В блок регулятора (рисунок~\ref{pic:controller observer}) добавляется расширенный наблюдатель,
+    представленный на рисунке~\ref{pic:extended observer}, задача которого давать оценку вектора
+    обобщённой скорости.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[height=0.2\textheight]{extended observer.png}
+        \caption{Модель расширенного наблюдателя}
+        \label{pic:extended observer}
+    \end{figure}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\textwidth]{controller observer.png}
+        \caption{Модель регулятора с расширенным наблюдателем}
+        \label{pic:controller observer}
+    \end{figure}
+
+    Результат моделирования представлен на рисунке~\ref{pic:result no speed}. По графику очевидно, что ошибка
+    положения звеньев сходится в нулю и соответственно цель моделирования~\eqref{eq:goal} выполнена.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\textwidth]{result no speed.png}
+        \caption{Ошибка положения системы}
+        \label{pic:result no speed}
+    \end{figure}
+
+    \appendix \newpage
+    \renewcommand{\thesection}{Приложение \Asbuk{section}}
+    \section{Параметры инициализации}\label{code:given}
+    \octavefile[frame=single]{../src/given.m}
+
+    \newpage
+    \section{Блоки расчёта матриц}\label{code:matricies}
+    \begin{octavecode*}{frame=single}
+        function M = moments(q)
+            global rho;
+            c2 = cos(q(2));
+            M = [
+                rho(1) + rho(2) + 2*rho(3)*c2 + rho(4) rho(2) + rho(3)*c2;
+                rho(2) + rho(3)*c2 rho(2) + rho(5);
+                ];
+        end
+
+        function C = coreolis(dq, q)
+            global rho;
+            s2 = sin(q(2));
+            C = [
+                -rho(3)*s2*dq(2) -rho(3)*s2*(dq(1) + dq(2));
+                rho(3)*s2*dq(1) 0
+                ];
+        end
+
+        function G = gravit(q)
+            global rho;
+            c1 = cos(q(1));
+            c12 = cos(q(1) + q(2));
+            G = [
+                rho(6)*c1 + rho(7)*c12;
+                rho(8)*c12
+                ];
+        end
+    \end{octavecode*}
+
 
 \end{document}
