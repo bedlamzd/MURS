@@ -1,0 +1,160 @@
+%! Author = bedlamzd
+%! Date = 28.02.2021
+
+% Preamble
+\documentclass[14pt]{extarticle}
+
+\include{preamble}
+
+% Document
+\begin{document}
+    \include{title_page}
+
+    \section*{Теория}
+
+    \section*{Задание}
+    Выполнить моделирование системы удержания положения квадрокоптера, динамика которого описывается моделью~\eqref{eq:model}
+    с использованием системы управления на базе усовершенствованного расширенного наблюдателя.
+
+    Использовать следующие величины:
+
+    \begin{equation*}
+        r_0 = 5,\ r_1 = 10,\ \alpha = 0.9
+    \end{equation*}
+    для стабилизации координаты $z$,
+
+    \begin{equation*}
+        \begin{aligned}
+            & K = \left( -100 -100 -100 -10 \right) \\
+            & a_0 = 0.01,\ a_1 = 1,\ a_2 = 1000,\ a_3 = 1000,\ a_4 = 10 \\
+            & \bar{B} =
+            \begin{pmatrix}
+                g & 0 \\
+                0 & -g
+            \end{pmatrix},\,
+            N = 100,\ \kappa = 5
+        \end{aligned}
+    \end{equation*}
+    для стабилизации координат $x$, $y$.
+
+    Отразить графики переходных процессов ошибок регулирования, выходных переменных, углов крена и тангажа, а также
+    сигнала $\left|\cos{\theta}\cos{\psi}\right|$.
+
+    \section*{Построение модели}
+    В пакете MATLAB была составлена модель, представленная на рисунке~\ref{pic:system}. Модель состоит из трёх основных
+    блоков --- модели квадрокоптера (рисунок~\ref{pic:quadro}), регулятора по высоте (рисунок~\ref{pic:stab}) и
+    регулятора с усовершенствованным расширенным наблюдателем (УРН) (рисунок~\ref{pic:u}).
+
+    В приложении~\ref{code:given} приведён скрипт инициализации параметров модели.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\textwidth]{system.png}
+        \caption{Модель управления квадрокоптером}
+        \label{pic:system}
+    \end{figure}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\textwidth]{quadro.png}
+        \caption{Блок модели квадрокоптера}
+        \label{pic:quadro}
+    \end{figure}
+
+    На рисунках~\ref{pic:x}-\ref{pic:z} представлены блоки определения координат квадрокоптера согласно~\eqref{eq:quadro model}.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[height=0.2\textheight]{x.png}
+        \caption{Блок определения координаты $x$}
+        \label{pic:x}
+    \end{figure}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[height=0.2\textheight]{y.png}
+        \caption{Блок определения координаты $y$}
+        \label{pic:y}
+    \end{figure}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[height=0.3\textheight]{z.png}
+        \caption{Блок определения координаты $z$}
+        \label{pic:z}
+    \end{figure}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\textwidth]{stabilizer.png}
+        \caption{Блок регулятора по высоте}
+        \label{pic:stab}
+    \end{figure}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\textwidth]{u.png}
+        \caption{Блок регулятора с УРН}
+        \label{pic:u}
+    \end{figure}
+
+    Поскольку углы крена и тангажа неизмеримы, необходимо использовать УРН для каждого. Общее строение обоих блоков
+    одинаково, поэтому приведём один (рисунок~\ref{pic:observer}). Данный блок позволяет найти оценку ускорения каждого
+    угла, которую в свою очередь можно использовать для определения самого угла.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\textwidth]{observer.png}
+        \caption{Блок УРН}
+        \label{pic:observer}
+    \end{figure}
+
+    \section*{Результаты моделирования}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\textwidth]{xyz.png}
+        \caption{Координаты квадрокоптера}
+        \label{pic:xyz}
+    \end{figure}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\textwidth]{angles.png}
+        \caption{Углы квадрокоптера}
+        \label{pic:angles}
+    \end{figure}
+
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}{0.49\textwidth}
+            \includegraphics[width=\linewidth]{x eps.png}
+            \caption{Ошибка по $x$}
+        \end{subfigure}
+        \begin{subfigure}{0.49\textwidth}
+            \includegraphics[width=\linewidth]{y eps.png}
+            \caption{Ошибка по $y$}
+        \end{subfigure}
+        \caption{Ошибки регулирования}
+        \label{pic:eps}
+    \end{figure}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\textwidth]{abs(cc).png}
+        \caption{Сравнение $\left| \cos\theta\cos\psi \right|$ и $\dfrac{1}{1+\alpha}$}
+        \label{pic:abs(cc)}
+    \end{figure}
+
+
+    \section*{Вывод}
+    В работе реализована модель удержания положения квадрокоптера на базе усовершенствованного расширенного наблюдателя.
+    Результаты моделирования показывают, что координаты, углы и ошибки сходятся к нулю, что было и целью управления.
+    Также по графикам видно, что выполняются поставленные ограничения $\left| \cos\theta\cos\psi \right| \ge \dfrac{1}{1+\alpha}$,
+    $\left| \theta \right| < \dfrac{\pi}{2}$ и $\left| \psi \right| < \dfrac{\pi}{2}$.
+
+    \appendix \newpage
+    \renewcommand{\thesection}{\Asbuk{section}}
+    \section{Функция решения прямой задачи кинематики}\label{code:given}
+    \octavefile[frame=single]{../src/given.m}
+
+\end{document}
