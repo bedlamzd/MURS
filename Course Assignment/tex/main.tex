@@ -11,6 +11,56 @@
     \include{title_page}
 
     \section*{Теория}
+    Квадрокоптер имеет 6 координат для управления --- линейные координаты $x,\ y,\ z$ и угловые $\theta,\ \psi,\ \varphi$.
+    Угол рыскания ($\varphi$) может быть застабилизирован независимо и допуская что эта задача выполнена модель управления
+    квадрокоптером принимает вид
+    \begin{equation}\label{eq:model}
+        \begin{aligned}
+            \ddot{x} & = (g + u_0)\sin\theta\cos\psi\\
+            \ddot{y} & = -(g + u_0)\sin\psi\\
+            \ddot{z} & = (g + u_0)\cos\theta\cos\psi - g\\
+            \ddot{\theta} & = u_1\\
+            \ddot{\varphi} & = u_2\\
+        \end{aligned}
+    \end{equation}
+
+    Для стабилизации высоты $u_0$ выбирается следующим
+    \begin{equation}\label{eq:u0}
+        u_0 = \text{sat}_{\alpha g}\left( -r_0z - r_1\dot{z} \right)
+    \end{equation}
+    при $\alpha < 1$. Выбрав подходящие $r_0,\ r_1$ система управления по $z$ будет устойчива если выполняется условие
+    $\left| \cos\theta\cos\psi \right| \ge \dfrac{1}{1+\alpha}$.
+
+    Поскольку углы крена и тангажа недоступны измерению необходимо реализовать усовершенствованный расширенный наблюдатель (УРН).
+    Тогда управляющие сигналы задаются следующим образом
+    \begin{equation}\label{eq:u}
+        u =
+        \begin{pmatrix}
+            u_1 \\
+            u_2
+        \end{pmatrix} =
+        \begin{pmatrix}
+            \text{sat}_N(\hat{u_1})\\
+            \text{sat}_N(\hat{u_2})
+        \end{pmatrix},
+    \end{equation}
+    при
+    \begin{equation}\label{eq:est u}
+        \begin{pmatrix}
+            \hat{u_1} \\
+            \hat{u_2}
+        \end{pmatrix} =
+        \bar{B}^{-1}
+        \begin{pmatrix}
+            K\hat{\xi_1} - \sigma_1 \\
+            K\hat{\xi_2} - \sigma_2
+        \end{pmatrix},
+    \end{equation}
+    где $N$ --- настроечный параметр,
+    $\bar{B}$ --- некоторая приближённая несингулярная матрица,
+    $\xi,\ \sigma$ --- состояние УНР (вывод в методическом пособии).
+
+    Данные уравнения позволяют построить модель управления квадрокоптером.
 
     \section*{Задание}
     Выполнить моделирование системы удержания положения квадрокоптера, динамика которого описывается моделью~\eqref{eq:model}
@@ -43,13 +93,13 @@
     \section*{Построение модели}
     В пакете MATLAB была составлена модель, представленная на рисунке~\ref{pic:system}. Модель состоит из трёх основных
     блоков --- модели квадрокоптера (рисунок~\ref{pic:quadro}), регулятора по высоте (рисунок~\ref{pic:stab}) и
-    регулятора с усовершенствованным расширенным наблюдателем (УРН) (рисунок~\ref{pic:u}).
+    регулятора с УРН (рисунок~\ref{pic:u}).
 
     В приложении~\ref{code:given} приведён скрипт инициализации параметров модели.
 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.75\textwidth]{system.png}
+        \includegraphics[width=\textwidth]{system.png}
         \caption{Модель управления квадрокоптером}
         \label{pic:system}
     \end{figure}
@@ -61,7 +111,7 @@
         \label{pic:quadro}
     \end{figure}
 
-    На рисунках~\ref{pic:x}-\ref{pic:z} представлены блоки определения координат квадрокоптера согласно~\eqref{eq:quadro model}.
+    На рисунках~\ref{pic:x}-\ref{pic:z} представлены блоки определения координат квадрокоптера согласно~\eqref{eq:model}.
     \begin{figure}[H]
         \centering
         \includegraphics[height=0.2\textheight]{x.png}
@@ -83,6 +133,7 @@
         \label{pic:z}
     \end{figure}
 
+    Регулятор по высоте выполненый по уравнению~\eqref{eq:u0}
     \begin{figure}[H]
         \centering
         \includegraphics[width=\textwidth]{stabilizer.png}
@@ -90,6 +141,7 @@
         \label{pic:stab}
     \end{figure}
 
+    Регулятор выполненый по системе~\eqref{eq:est u}
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.75\textwidth]{u.png}
@@ -148,13 +200,13 @@
 
     \section*{Вывод}
     В работе реализована модель удержания положения квадрокоптера на базе усовершенствованного расширенного наблюдателя.
-    Результаты моделирования показывают, что координаты, углы и ошибки сходятся к нулю, что было и целью управления.
+    Результаты моделирования показывают, что координаты, углы и ошибки сходятся к нулю, что и было целью управления.
     Также по графикам видно, что выполняются поставленные ограничения $\left| \cos\theta\cos\psi \right| \ge \dfrac{1}{1+\alpha}$,
     $\left| \theta \right| < \dfrac{\pi}{2}$ и $\left| \psi \right| < \dfrac{\pi}{2}$.
 
-    \appendix \newpage
+    \appendix
     \renewcommand{\thesection}{\Asbuk{section}}
-    \section{Функция решения прямой задачи кинематики}\label{code:given}
+    \section{Скрипт инициализации модели}\label{code:given}
     \octavefile[frame=single]{../src/given.m}
 
 \end{document}
